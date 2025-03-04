@@ -45,13 +45,16 @@ const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
       ...values,
       image: values.image instanceof File ? values.image : "",
     };
-    console.log("Final Values:", finalValues);
+    console.log("Final Values:", finalValues.image instanceof File);
     mutate({ form: finalValues });
     // console.log(finalValues);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+
+    console.log("Selected file:", file);
+    console.log("instanceof", file instanceof File);
     if (file) {
       form.setValue("image", file);
     } else {

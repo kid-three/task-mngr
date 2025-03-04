@@ -7,6 +7,14 @@ import { sessionMiddleware } from "@/lib/session-middleware";
 
 import { DATABASE_ID, IMAGES_BUCKET_ID, WORKSPACES_ID } from "@/config";
 
+// import { File } from "buffer";
+
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 const app = new Hono().post(
   "/",
   zValidator("form", createWorkspaceSchema),
@@ -18,17 +26,28 @@ const app = new Hono().post(
 
     const { name, image } = c.req.valid("form");
 
-    if (!(image instanceof File)) {
-      return c.json({ error: "Input not instance of File11" }, 400);
-    }
+    console.log("Received image:", image);
+    console.log("Type of image:", typeof image);
+    console.log("Instance of File:", image instanceof File);
+
+    // if (!(image instanceof File)) {
+    //   return c.json({ error: "Input not instance of File" }, 400);
+    // }
 
     let uploadedImageUrl: string | undefined;
 
-    if (image instanceof File) {
+    if (image instanceof Blob) {
+      const fileExtension = image.type.split("/")[1]; // Get the file extension from the MIME type
+      const fileName = `workspace-image-${getRandomInt(
+        1,
+        100,
+      )}.${fileExtension}`;
+      const fileImage = new File([image], fileName, { type: image.type });
+
       const file = await storage.createFile(
         IMAGES_BUCKET_ID,
         ID.unique(),
-        image,
+        fileImage,
       );
 
       const arrayBuffer = await storage.getFilePreview(
